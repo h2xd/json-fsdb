@@ -1,12 +1,11 @@
 import { createReadStream, createWriteStream, mkdir } from 'fs';
 import { promisify } from 'util';
-import { DatabaseSignature, DatabaseOptions } from './types';
+import { addToCollection } from './methods/addToCollection';
+import { getAllFromCollection } from './methods/getAllFromCollection';
+import { DatabaseOptions, DatabaseSignature } from './types';
 import { createFilepath } from './utils/createFilepath';
 
 const mkdirAsync = promisify(mkdir);
-
-// unwrap up to one level
-type ArrayType<T> = T extends Array<infer U> ? U : T;
 
 export class JsonFSDB<Schema> {
   private memory: DatabaseSignature & Schema;
@@ -75,27 +74,29 @@ export class JsonFSDB<Schema> {
     }
   }
 
-  private createAdder<K extends keyof Schema>(key: K) {
-    return (data: ArrayType<Schema[K]>) => {
-      this.aspectCollection(key);
-
-      this.memory[key].push(data);
-      this.sync();
-    }
-  }
-
-  private createGetAll<K extends keyof Schema>(key: K) {
-    return () => {
-      this.aspectCollection(key);
-
-      return this.memory[key];
-    }
-  }
-
+  /**
+   * Create collection type with util functions
+   * @param key key that has been defined in the schema
+   */
   public getCollection<K extends keyof Schema>(key: K) {
+    this.aspectCollection(key);
+
+    const { memory, sync } = this;
+    const methodParameterBinding = {
+      sync: sync.bind(this),
+      memory,
+      key
+    }
+
     return {
-      getAll: this.createGetAll(key),
-      add: this.createAdder(key)
+      /**
+       * get all entries in the collection
+       */
+      getAll: getAllFromCollection(methodParameterBinding),
+      /**
+       * add an new entry to the collection
+       */
+      add: addToCollection(methodParameterBinding)
     }
   }
 }
