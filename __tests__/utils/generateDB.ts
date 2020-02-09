@@ -1,4 +1,4 @@
-import { JsonFSDB } from '../../JsonFSDB';
+import { JsonFSDB } from '../../src/JsonFSDB';
 
 export async function generateDB<T>(dir: string, name: string): Promise<JsonFSDB<T>> {
   return new Promise(async (resolve, reject) => {
