@@ -11,7 +11,7 @@ export interface DatabaseOptions {
 }
 
 export interface DatabaseBinding<T> {
-  sync: JsonFSDB<T>['sync'],
+  hibernate: JsonFSDB<T>['hibernate'],
   memory: DatabaseSignature & T,
   key: keyof T
 }
