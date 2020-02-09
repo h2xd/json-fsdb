@@ -1,11 +1,14 @@
+const TEST_DIR = "<rootDir>/__tests__";
+
 module.exports = {
   "roots": [
-    "<rootDir>/src"
+    "<rootDir>/__tests__"
   ],
   "transform": {
     "^.+\\.tsx?$": "ts-jest"
   },
   "modulePathIgnorePatterns": [
-    "<rootDir>/src/__tests__/utils"
-  ]
+    `${TEST_DIR}/utils`,
+    `${TEST_DIR}/setup`
+  ],
 }
