@@ -10,7 +10,11 @@ export interface DatabaseOptions {
   encoding: string;
 }
 
-export interface DatabaseMethodsOptions<T, K extends keyof T> {
+export interface DatabaseBinding<T> {
   sync: JsonFSDB<T>['sync'],
-  key: K
+  memory: DatabaseSignature & T,
+  key: keyof T
 }
+
+// unwrap up to one level
+export type ArrayType<T> = T extends Array<infer U> ? U : T;
