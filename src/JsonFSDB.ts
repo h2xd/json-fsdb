@@ -1,32 +1,37 @@
-import { createReadStream, createWriteStream, mkdir } from 'fs';
+import { createReadStream, createWriteStream, mkdir, writeFile } from 'fs';
 import { promisify } from 'util';
 import { addToCollection } from './methods/addToCollection';
 import { getAllFromCollection } from './methods/getAllFromCollection';
 import { DatabaseOptions, DatabaseSignature } from './types';
 import { createFilepath } from './utils/createFilepath';
+import { removeFromCollection } from './methods/removeFromCollection';
 
 const mkdirAsync = promisify(mkdir);
+const writeFileAync = promisify(writeFile);
 
 export class JsonFSDB<Schema> {
   private memory: DatabaseSignature & Schema;
   private initializied = false;
+  private filepath: string;
 
   constructor(
     private options: DatabaseOptions
   ) {
+    const { dir, name } = this.options;
 
+    this.filepath = createFilepath(dir, name);
   }
 
   public async init(): Promise<void> {
     return new Promise(async (resolve, reject) => {
-      const { dir, name, encoding } = this.options;
+      const { dir, encoding } = this.options;
 
       try {
         if (this.initializied) {
           resolve();
         }
 
-        const readable = createReadStream(createFilepath(dir, name), { encoding });
+        const readable = createReadStream(this.filepath, { encoding });
 
         readable.on('data', (data) => {
           this.memory = JSON.parse(data);
@@ -48,14 +53,14 @@ export class JsonFSDB<Schema> {
     });
   };
 
-  public sync() {
+  /**
+   * Hibernate the memory to the systems drive
+   */
+  public async hibernate() {
     try {
-      const { dir, name, encoding } = this.options;
-
-      const writeable = createWriteStream(createFilepath(dir, name), { encoding, flags: 'w' });
-
-      writeable.write(JSON.stringify(this.memory));
-      writeable.end();
+      // TODO: Find a better way to clear up the file, before the memory gets hibernated
+      await writeFileAync(this.filepath, '');
+      await writeFileAync(this.filepath, JSON.stringify(this.memory));
     } catch (error) {
       console.error(error);
     }
@@ -81,9 +86,9 @@ export class JsonFSDB<Schema> {
   public getCollection<K extends keyof Schema>(key: K) {
     this.aspectCollection(key);
 
-    const { memory, sync } = this;
+    const { memory, hibernate } = this;
     const methodParameterBinding = {
-      sync: sync.bind(this),
+      hibernate: hibernate.bind(this),
       memory,
       key
     }
@@ -96,7 +101,9 @@ export class JsonFSDB<Schema> {
       /**
        * add an new entry to the collection
        */
-      add: addToCollection(methodParameterBinding)
+      add: addToCollection(methodParameterBinding),
+
+      remove: removeFromCollection(methodParameterBinding),
     }
   }
 }
