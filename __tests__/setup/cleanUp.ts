@@ -1,8 +1,9 @@
 import rimraf from 'rimraf';
+import { TESTDIR } from '../utils/options';
 
-export async function clearDB(dir: string) {
+export function cleanUp() {
   return new Promise((resolve, reject) => {
-    rimraf(dir, (err) => {
+    rimraf(TESTDIR, (err) => {
       if (err) {
         reject(err)
       }
