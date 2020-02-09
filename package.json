@@ -1,10 +1,11 @@
 {
-  "name": "json-localdb",
-  "version": "1.0.0",
-  "description": "Simple JSON based Database like wrapper for simple applications",
+  "name": "json-fsdb",
+  "version": "0.1.0",
+  "description": "Low json based database like wrapper for small projects or prototypes",
   "main": "/dist/index.js",
   "scripts": {
-    "test": "npx jest"
+    "test": "npx jest",
+    "ci": "npm run test"
   },
   "author": "Andreas Schujkow <a.schujkow@gmail.com>",
   "license": "MIT",
