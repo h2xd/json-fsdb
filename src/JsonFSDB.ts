@@ -1,16 +1,16 @@
-import { createReadStream, createWriteStream, mkdir, writeFile } from 'fs';
+import { createReadStream, mkdir, writeFile } from 'fs';
 import { promisify } from 'util';
 import { addToCollection } from './methods/addToCollection';
 import { getAllFromCollection } from './methods/getAllFromCollection';
-import { DatabaseOptions, DatabaseSignature } from './types';
-import { createFilepath } from './utils/createFilepath';
 import { removeFromCollection } from './methods/removeFromCollection';
+import { DatabaseBinding, DatabaseOptions, DatabaseSignature } from './types';
+import { createFilepath } from './utils/createFilepath';
 
 const mkdirAsync = promisify(mkdir);
 const writeFileAync = promisify(writeFile);
 
 export class JsonFSDB<Schema> {
-  private memory: DatabaseSignature & Schema;
+  private memory: DatabaseSignature<Schema>;
   private initializied = false;
   private filepath: string;
 
@@ -68,13 +68,10 @@ export class JsonFSDB<Schema> {
 
   private aspectCollection<K extends keyof Schema>(key: K) {
     if (this.memory === undefined) {
-      // TODO research how a assign empty types to the defined "Schema" type
-      // @ts-ignore
       this.memory = {};
     }
 
     if (this.memory[key] === undefined) {
-      // @ts-ignore
       this.memory[key] = [];
     }
   }
@@ -91,7 +88,7 @@ export class JsonFSDB<Schema> {
       hibernate: hibernate.bind(this),
       memory,
       key
-    }
+    } as DatabaseBinding<Schema, K>;
 
     return {
       /**
