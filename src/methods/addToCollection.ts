@@ -1,6 +1,6 @@
-import { ArrayType, DatabaseBinding } from '../types';
+import { ArrayType, DatabaseBinding, DatabaseSignature } from '../types';
 
-export function addToCollection<Schema, K extends keyof Schema>(methods: DatabaseBinding<Schema>) {
+export function addToCollection<Schema extends DatabaseSignature<Schema>, K extends keyof Schema>(methods: DatabaseBinding<Schema, K>) {
   const { memory, key, hibernate } = methods;
 
   /**

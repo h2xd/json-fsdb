@@ -1,11 +1,14 @@
-import { ArrayType, DatabaseBinding } from '../types';
+import { ArrayType, DatabaseBinding, DatabaseSignature } from '../types';
 
-export function removeFromCollection<Schema, K extends keyof Schema>(methods: DatabaseBinding<Schema>) {
+export function removeFromCollection<Schema extends DatabaseSignature<Schema>, K extends keyof Schema>(methods: DatabaseBinding<Schema, K>) {
   const { memory, key, hibernate } = methods;
 
+  /**
+   * Remove an entry from the collection
+   * @param data entry to be removed
+   */
   return async function remove(data: ArrayType<Schema[K]>) {
-    // @ts-ignore
-    memory[key] = memory[key].filter((d): d is keyof Schema => d !== data);
+    memory[key] = (memory[key].filter((d) => d !== data) as Schema[K]);
 
     await hibernate();
   }
