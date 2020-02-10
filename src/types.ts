@@ -1,7 +1,7 @@
 import { JsonFSDB } from './JsonFSDB';
 
-export interface DatabaseSignature {
-  [key: string]: any[]
+export type DatabaseSignature<Schema> = {
+  [Key in keyof Schema]?: ArrayType<Schema[keyof Schema]>[]
 }
 
 export interface DatabaseOptions {
@@ -10,11 +10,11 @@ export interface DatabaseOptions {
   encoding: string;
 }
 
-export interface DatabaseBinding<T> {
-  hibernate: JsonFSDB<T>['hibernate'],
-  memory: DatabaseSignature & T,
-  key: keyof T
+export interface DatabaseBinding<Schema, K extends keyof Schema> {
+  hibernate: JsonFSDB<Schema>['hibernate'],
+  memory: DatabaseSignature<Schema>,
+  key: K
 }
 
-// unwrap up to one level
+// unwrap to get the array type
 export type ArrayType<T> = T extends Array<infer U> ? U : T;
